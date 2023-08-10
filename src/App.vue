@@ -1,30 +1,29 @@
 <template>
-  <nav>
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </nav>
-  <router-view/>
+  <v-card>
+    <v-layout>
+      <NavBar />
+      <v-main style="height: 100vh;" v-if="!loading">
+        <router-view/>
+      </v-main>
+    </v-layout>
+  </v-card>
 </template>
 
-<style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script lang="ts">
+import { defineComponent } from 'vue';
+import NavBar from './components/NavBar.vue'; // @ is an alias to /src
 
-nav {
-  padding: 30px;
-}
-
-nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-nav a.router-link-exact-active {
-  color: #42b983;
-}
-</style>
+export default defineComponent({
+  components: {
+    NavBar
+  },
+  data () {
+    return {
+      loading: true
+    }
+  },
+  mounted () {
+    this.loading = false
+  }
+})
+</script>
