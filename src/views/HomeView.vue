@@ -1,18 +1,37 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+  <v-sheet
+    class="d-flex align-center justify-center flex-wrap text-center mx-auto px-4 my-5"
+    elevation="10"
+    height="250"
+    rounded
+    max-width="800"
+    width="100%"
+  >
+    <div>
+      <h2 class="text-h4 font-weight-black text-orange">Protótipo para Avaliação de Candidato.</h2>
+
+      <div class="text-h5 font-weight-medium mb-2">
+        A Avaliação consiste no desenvolvimento da funcionalidade "Performance Comercial"
+      </div>
+
+      <p class="text-body-2 mb-4">
+       (Comercial -> Performance Comercial)
+      </p>
+
+      <v-btn variant="text" color="orange" @click="setCommercial">Performance Comercial</v-btn>
+    </div>
+  </v-sheet>
 </template>
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
 
 export default defineComponent({
   name: 'HomeView',
-  components: {
-    HelloWorld,
-  },
-});
+  methods: {
+    setCommercial () {
+      this.$router.replace({ path: '/commercial' })
+    }
+  }
+})
 </script>
