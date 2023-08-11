@@ -112,7 +112,11 @@ export default defineComponent({
   },
   methods: {
     organizeDataSerie () {
-      const dataBarRaw        = JSON.parse(JSON.stringify(this.dataBar))
+      const dataBarRaw = JSON.parse(JSON.stringify(this.dataBar))
+
+      if (!dataBarRaw) {
+        return false
+      }
 
       this.yAxis.max          = Number(dataBarRaw.max_income.toFixed(2))
       this.averageFixedSalary = Number(dataBarRaw.average_fixed_salary.toFixed(2))
