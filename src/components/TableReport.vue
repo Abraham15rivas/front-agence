@@ -60,6 +60,9 @@
 </template>
 
 <script>
+// Function for currency formatter
+import currencyFormatter from '../currencyFormatter'
+
 export default {
   name: 'TableReport',
   props: {
@@ -99,12 +102,7 @@ export default {
       this.totals.profit      = dataReportRaw.map(item => item.profit).reduce((prev, curr) => prev + curr, 0)
     },
     currencyFormatter ({ currency, value}) {
-      const formatter = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        minimumFractionDigits: 2,
-        currency
-      })
-      return formatter.format(value)
+      return currencyFormatter({ currency, value})
     },
     setFormatDate (date) {
       let year = date.substring(0,4)

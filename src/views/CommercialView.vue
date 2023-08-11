@@ -33,7 +33,7 @@
             rounded="lg"
             width="100%"
             class="pa-4 text-center mx-auto overflow-auto scroll"
-            max-height="350"
+            max-height="400"
           >
             <div v-if="listReport.length === undefined && tag === 'relatorio'">
               <div
@@ -47,11 +47,30 @@
                 />
               </div>
             </div>
-            <div v-else-if="dataBar.length === undefined && tag === 'bar'">
-              <h1>bar test</h1>
+            <div v-else-if="dataBar && dataBar.list && tag === 'bar'">
+              <BarGraph
+                :dataBar="dataBar"
+              />
             </div>
-            <div v-else-if="dataPie.length === undefined && tag === 'pie'">
-              <h1>pie test</h1>
+            <div v-else-if="dataPie && dataPie.list && dataPie.list.length > 0 && tag === 'pie'">
+              <PieGraph
+                :dataPie="dataPie"
+              />
+            </div>
+            <div v-else-if="loading">
+              <v-container>
+                <v-row justify="center">
+                  <v-col
+                    class="mb-12"
+                    cols="12"
+                    md="6"
+                  >
+                    <div class="text-h5 text-center">
+                      Carregamento
+                    </div>
+                  </v-col>
+                </v-row>
+              </v-container>
             </div>
             <div v-else>
               <v-alert
@@ -62,7 +81,6 @@
               ></v-alert>
             </div>
           </v-sheet>
-
         </div>
       </div>
     </v-card-item>
@@ -90,20 +108,25 @@ import { defineComponent, isProxy, toRaw } from 'vue'
 import moment from 'moment'
 import DatePicker from '../components/DatePicker.vue'
 import TableReport from '../components/TableReport.vue'
-import Consultant from '../services/Consultant'
+import PieGraph from '../components/PieGraph.vue'
+import BarGraph from '../components/BarGraph.vue'
 import ConsultantUser from '../interfaces/ConsultantUser'
+import Consultant from '../services/Consultant'
 
 export default defineComponent({
   name: 'CommercialView',
   components: {
     DatePicker,
-    TableReport
+    TableReport,
+    PieGraph,
+    BarGraph
   },
   mounted () {
     this.getListConsultants()
   },
   data() {
     return {
+      loading: false,
       listUser: [] as ConsultantUser[],
       listReport: [] as string[],
       items: [] as string[],
@@ -139,21 +162,25 @@ export default defineComponent({
       }
     },
     async getListConsultants() {
+      this.loading = true
+
       const { data } = await Consultant.getListConsultants()
 
       if (data.success) {
+        this.loading = false
         this.listUser = data.data
 
         if (this.listUser.length) {
           for (let i: any = 0; i < this.listUser.length; i++) {
             let user = this.listUser[i]
-            if (isProxy(user)){
+            if (isProxy(user)) {
               let userRaw = toRaw(user)
               this.items.push(userRaw.fullName)
             }
           }
         }
       } else {
+        this.loading = true
         console.log('algo salio mal')
       }
     },
@@ -172,15 +199,20 @@ export default defineComponent({
       }
     },
     async getReport () {
+      this.listReport = []
+      this.tag        = 'relatorio'
+
       this.getConsultants()
-      this.tag = 'relatorio'
 
       if (this.filters.consultants.length > 0) {
+        this.loading = true
         const { data } = await Consultant.getReport(this.filters)
 
         if (data.success) {
+          this.loading = false
           this.listReport = data.data
         } else {
+          this.loading = false
           console.log('algo salio mal')
         }
       } else {
@@ -188,10 +220,14 @@ export default defineComponent({
       }
     },
     async getGraph (type: string) {
+      this.dataPie  = []
+      this.dataBar  = []
+      this.tag      = type
+
       this.getConsultants()
-      this.tag = type
 
       if (this.filters.consultants.length > 0) {
+        this.loading = true
         const { data } = await Consultant.getGraph(this.filters, type)
 
         if (data.success) {
@@ -202,8 +238,10 @@ export default defineComponent({
           } else if (type === 'bar') {
             this.dataBar = result
           }
-          console.log(result)
+
+          this.loading = false
         } else {
+          this.loading = false
           console.log('algo salio mal')
         }
       } else {
