@@ -3,8 +3,10 @@
 </template>
 
 <script lang="ts">
+/* eslint-disable */
+
 import { defineComponent } from 'vue'
-import DataSerie from '../interfaces/DataSerie'
+import DataSerieBar from '../interfaces/DataSerieBar'
 import { Chart } from 'highcharts-vue'
 
 // Function for currency formatter
@@ -22,10 +24,13 @@ export default defineComponent({
   },
   data() {
     return {
-      dataSeries: [
-        1,2,3
-      ],
+      dataSeries: [] as DataSerieBar[],
       subtitle: '',
+      averageFixedSalary: 0,
+      yAxis: {
+        min: 0,
+        max: 0
+      },
       months: [
         'Jan',
         'Feb',
@@ -61,23 +66,28 @@ export default defineComponent({
           text: `Performance Comercial`
         },
         subtitle: {
-          text: `Total de Receita líquida: ${this.subtitle}`
+          text: this.subtitle
         },
         xAxis: {
           categories: this.months,
           crosshair: true,
           accessibility: {
-            description: 'Countries'
+            description: 'Meses'
           }
         },
         yAxis: {
-          min: 0,
+          min: this.yAxis.min,
+          max: this.yAxis.max,
+          crosshair: true,
           title: {
-            text: 'Cantidad'
+            text: 'Montante'
+          },
+          labels: {
+            formatter: function({ value }: { value: number}): string {
+              let valueFormatted = currencyFormatter({ currency: 'BRL', value })
+              return valueFormatted
+            }
           }
-        },
-        tooltip: {
-          valueSuffix: '.'
         },
         plotOptions: {
           column: {
@@ -85,56 +95,68 @@ export default defineComponent({
             borderWidth: 0
           }
         },
+        tooltip: {
+          backgroundColor: {
+            linearGradient: [0, 0, 0, 60],
+            stops: [
+              [0, '#FFFFFF'],
+              [1, '#E0E0E0']
+            ]
+          },
+          borderWidth: 1,
+          borderColor: '#AAA'
+        },
         series: this.dataSeries
       }
     }
   },
   methods: {
-    getPercentage (quantity: number, total: number) {
-      let percentage = (quantity * 100) / total
-      return percentage ? percentage.toFixed(2) : 0
-    },
-    getMonth (date: any) {
-      let month = date.substring(4,6)
-      return month
-    },
     organizeDataSerie () {
-      let dataBarRaw  = JSON.parse(JSON.stringify(this.dataBar))
-      const dataBar   = dataBarRaw.list
+      const dataBarRaw        = JSON.parse(JSON.stringify(this.dataBar))
 
-      console.log('dataBar', dataBar)
+      this.yAxis.max          = Number(dataBarRaw.max_income.toFixed(2))
+      this.averageFixedSalary = Number(dataBarRaw.average_fixed_salary.toFixed(2))
+      this.subtitle           = dataBarRaw.from_to_date
 
-      for (let i: any = 1; i < (this.months.length + 1); i++) {
-        let item = dataBar[i] === undefined ? 0 : dataBar[i]
-        let data = []
-        let name = null
+      const dataBar     = dataBarRaw.list
+      const consultants = dataBarRaw.consultants
 
-        for (let j: any = 1; j < (this.months.length + 1); j++) {
-          let keyJ = (j - 1)
+      let dataSerieAverageFixedSalary: DataSerieBar = {
+        type: 'line',
+        name: 'Custo Fixo Médio',
+        data: []
+      }
 
-          if (item === 0) {
-            data.push(item)
-          } else {
-            let keyData =  0
+      for (let i = 0; i < consultants.length; i++) {
+        let userName = consultants[i].username
+        let fullName = consultants[i].fullname
 
-            if (item[keyJ]) {
-              name = item[keyJ].fullname
-              keyData = Number(item[keyJ].net_income.toFixed(2))
-            }
-
-            data.push(keyData)
-          }
+        let dataSerie: DataSerieBar = {
+          type: 'column',
+          name: fullName,
+          data: []
         }
 
-        console.log(data)
+        for (let j: any = 0; j < this.months.length ; j++) {
+          let keyMonth    = (j + 1)
+          let consultant  = dataBar[userName]
 
-        let dataSerie = {
-          name,
-          data
+          let consultantNetIncome = consultant ? consultant.find((item: any) => item.date === keyMonth) : false
+
+          if (i === 0) {
+            dataSerieAverageFixedSalary.data.push(this.averageFixedSalary)
+          }
+
+          if (consultantNetIncome) {
+            let netIncomeFormatted = consultantNetIncome.net_income
+            dataSerie.data.push(Number(netIncomeFormatted))
+          }
         }
 
         this.dataSeries.push(dataSerie)
       }
+
+      this.dataSeries.push(dataSerieAverageFixedSalary)
     }
   }
 })

@@ -29,7 +29,9 @@
 </template>
 
 <script>
-export default {
+import { defineComponent } from 'vue'
+
+export default defineComponent({
   data: () => ({
     drawer: false,
     group: null,
@@ -77,5 +79,5 @@ export default {
       this.$router.replace({ path: '/' })
     }
   }
-}
+})
 </script>

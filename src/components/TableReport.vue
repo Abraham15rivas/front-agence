@@ -60,10 +60,12 @@
 </template>
 
 <script>
+import { defineComponent } from 'vue'
+
 // Function for currency formatter
 import currencyFormatter from '../currencyFormatter'
 
-export default {
+export default defineComponent({
   name: 'TableReport',
   props: {
     datareport: {
@@ -110,7 +112,7 @@ export default {
       return `${year}-${month}`
     }
   }
-}
+})
 </script>
 
 <style scoped>

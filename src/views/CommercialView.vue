@@ -9,6 +9,9 @@
       <div>
         <div class="text-overline my-2">
           Por Consultor
+          <AlertMessage
+            :alert="alert"
+          />
         </div>
 
         <v-divider class="py-2"></v-divider>
@@ -29,7 +32,7 @@
 
         <div class="my-5">
           <v-sheet
-            max-width="130vh"
+            max-width="120vh"
             rounded="lg"
             width="100%"
             class="pa-4 text-center mx-auto overflow-auto scroll"
@@ -66,7 +69,8 @@
                     md="6"
                   >
                     <div class="text-h5 text-center">
-                      Carregamento
+                      <v-btn dense variant="text" icon="mdi-reload"></v-btn>
+                      Carregamento . . .
                     </div>
                   </v-col>
                 </v-row>
@@ -74,10 +78,14 @@
             </div>
             <div v-else>
               <v-alert
+                elevation="5"
+                dense
                 type="info"
                 title="Nothing to show"
                 text="You must select a date and at least one consultant, then press one of the buttons shown below"
                 variant="tonal"
+                closable
+                close-label="Close Alert"
               ></v-alert>
             </div>
           </v-sheet>
@@ -106,6 +114,7 @@
 <script lang="ts">
 import { defineComponent, isProxy, toRaw } from 'vue'
 import moment from 'moment'
+import AlertMessage from '../components/AlertMessage.vue'
 import DatePicker from '../components/DatePicker.vue'
 import TableReport from '../components/TableReport.vue'
 import PieGraph from '../components/PieGraph.vue'
@@ -116,6 +125,7 @@ import Consultant from '../services/Consultant'
 export default defineComponent({
   name: 'CommercialView',
   components: {
+    AlertMessage,
     DatePicker,
     TableReport,
     PieGraph,
@@ -124,8 +134,18 @@ export default defineComponent({
   mounted () {
     this.getListConsultants()
   },
+  watch: {
+    'alert.active': function () {
+      setTimeout(() => this.resetAlert(), 1000)
+    }
+  },
   data() {
     return {
+      alert: {
+        active: false,
+        message: '',
+        color: ''
+      },
       loading: false,
       listUser: [] as ConsultantUser[],
       listReport: [] as string[],
@@ -142,6 +162,16 @@ export default defineComponent({
     }
   },
   methods: {
+    resetAlert () {
+      this.alert.active = false
+      this.alert.message = ''
+      this.alert.color = ''
+    },
+    setAlert (color: string, message: string) {
+      this.alert.active = true
+      this.alert.color = color
+      this.alert.message = message
+    },
     getFullName (username: string) {
       let filtered = this.listUser.filter((user: any) => user.userName === username)
 
@@ -167,8 +197,10 @@ export default defineComponent({
       const { data } = await Consultant.getListConsultants()
 
       if (data.success) {
-        this.loading = false
+        this.loading  = false
         this.listUser = data.data
+
+        this.setAlert('success', data.message)
 
         if (this.listUser.length) {
           for (let i: any = 0; i < this.listUser.length; i++) {
@@ -181,6 +213,7 @@ export default defineComponent({
         }
       } else {
         this.loading = true
+        this.setAlert('red-darken-2', data.message)
         console.log('algo salio mal')
       }
     },
@@ -209,14 +242,17 @@ export default defineComponent({
         const { data } = await Consultant.getReport(this.filters)
 
         if (data.success) {
+          this.setAlert('success', data.message)
           this.loading = false
           this.listReport = data.data
         } else {
+          this.setAlert('red-darken-2', data.message)
           this.loading = false
           console.log('algo salio mal')
         }
       } else {
-        console.log('debe seleccionar al menos un consultor')
+        this.setAlert('red-darken-2', 'É necessário selecionar pelo menos um consultor')
+        console.log('Debe seleccionar al menos un consultor')
       }
     },
     async getGraph (type: string) {
@@ -231,6 +267,7 @@ export default defineComponent({
         const { data } = await Consultant.getGraph(this.filters, type)
 
         if (data.success) {
+          this.setAlert('success', data.message)
           const result = data.data
 
           if (type === 'pie') {
@@ -241,10 +278,12 @@ export default defineComponent({
 
           this.loading = false
         } else {
+          this.setAlert('red-darken-2', data.message)
           this.loading = false
           console.log('algo salio mal')
         }
       } else {
+        this.setAlert('red-darken-2', 'É necessário selecionar pelo menos um consultor')
         console.log('debe seleccionar al menos un consultor')
       }
     }

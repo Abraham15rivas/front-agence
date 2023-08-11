@@ -9,6 +9,7 @@
           <input
             id="date-from"
             v-model="filterDatePicker.dateFrom"
+            :max="filterDatePicker.dateTo"
             type="date"
           >
         </span>
@@ -16,6 +17,8 @@
           <input
             id="date-to"
             v-model="filterDatePicker.dateTo"
+            :min="filterDatePicker.dateFrom"
+            :max="dateMaxTo"
             type="date"
           >
         </span>
@@ -36,6 +39,11 @@ export default defineComponent({
     },
     'filterDatePicker.dateTo': function () {
       this.$emit('filterDatePicker', this.filterDatePicker)
+    }
+  },
+  computed: {
+    dateMaxTo () {
+      return moment().endOf('month').format('YYYY-MM-DD')
     }
   },
   data () {
