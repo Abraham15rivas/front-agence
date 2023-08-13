@@ -1,4 +1,4 @@
-export default interface Consultant {
+export default interface ConsultantUser {
     organization: string;
     userName: string;
     fullName: string;

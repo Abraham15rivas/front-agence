@@ -59,7 +59,12 @@ export default defineComponent({
       return percentage ? percentage.toFixed(2) : 0
     },
     organizeDataSerie () {
-      let dataPieRaw  = JSON.parse(JSON.stringify(this.dataPie))
+      let dataPieRaw = JSON.parse(JSON.stringify(this.dataPie))
+
+      if (!dataPieRaw) {
+        return false
+      }
+
       const dataPie   = dataPieRaw.list
 
       const totalInt  = dataPieRaw.total
