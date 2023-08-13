@@ -1,4 +1,4 @@
-export default interface Consultant {
+export default interface DataSerieBar {
     name: any;
     data: any;
     type: string;
