@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="overflow-auto">
     <v-layout>
       <NavBar />
       <v-main style="height: 100vh;" v-if="!loading">
