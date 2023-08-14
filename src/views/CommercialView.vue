@@ -212,7 +212,7 @@ export default defineComponent({
           }
         }
       } else {
-        this.loading = true
+        this.loading = false
         this.setAlert('red-darken-2', data.message)
         console.log('algo salio mal')
       }
