@@ -1,8 +1,7 @@
 <template>
   <v-sheet
-    class="d-flex align-center justify-center flex-wrap text-center mx-auto px-4 my-5"
+    class="d-flex align-center justify-center flex-wrap text-center mx-auto px-5 py-5 my-5"
     elevation="10"
-    height="250"
     rounded
     max-width="800"
     width="100%"
